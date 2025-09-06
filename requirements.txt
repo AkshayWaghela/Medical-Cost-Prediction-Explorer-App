@@ -6,3 +6,4 @@ pandas
 seaborn
 scikit-learn
 tensorflow
+tensorflow_docs
