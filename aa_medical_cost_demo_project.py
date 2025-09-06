@@ -14,11 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-try:
-  # %tensorflow_version only exists in Colab.
-#   %tensorflow_version 2.x
-except Exception:
-  pass
 import tensorflow as tf
 
 from tensorflow import keras
