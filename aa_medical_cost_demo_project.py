@@ -208,7 +208,8 @@ with col3:
 # --------------------
 # Plot
 # --------------------
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.hist(df['expenses'])
     ax.bar(["Predicted Expense"], [pred], color="skyblue")
     ax.set_ylabel("Expense ($)")
     ax.set_title("Predicted Medical Expense")
