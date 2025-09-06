@@ -7,11 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1-WqRXWGNWxitulKkIR11Glcrh9GJh0Ra
 """
 
-pip install streamlit
 
 # Commented out IPython magic to ensure Python compatibility.
 # Import libraries. You may or may not use all of these.
-!pip install -q git+https://github.com/tensorflow/docs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -36,7 +34,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.metrics import mean_absolute_error
 
 # Import data
-!wget https://cdn.freecodecamp.org/project-data/health-costs/insurance.csv
 dataset = pd.read_csv('insurance.csv')
 dataset.tail()
 
