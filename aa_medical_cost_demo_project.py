@@ -78,7 +78,7 @@ early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=1
 lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5)
 
 history = model.fit(X_train, y_train,
-                    epochs=100,
+                    epochs=10,
                     batch_size=16,
                     validation_split=0.2,
                     callbacks=[early_stopping, lr_scheduler],
@@ -195,7 +195,7 @@ if st.button("🚀 Train Model"):
     history = model.fit(
         X_train,
         y_train,
-        epochs=100,
+        epochs=10,
         batch_size=16,
         validation_split=0.2,
         callbacks=[early_stopping, lr_scheduler],
@@ -242,11 +242,21 @@ if st.button("🚀 Train Model"):
         smoker = st.selectbox("Smoker", ["yes", "no"])
         region = st.selectbox("Region", df["region"].unique())
 
-    if st.button("Predict My Expense"):
-        input_df = pd.DataFrame(
-            [[age, bmi, children, sex, smoker, region]],
-            columns=["age", "bmi", "children", "sex", "smoker", "region"],
-        )
+        if st.button("Predict"):
+            input_df = pd.DataFrame([[age, bmi, children, sex, smoker, region]],
+                            columns=["age", "bmi", "children", "sex", "smoker", "region"])
+    
         input_transformed = preprocessor.transform(input_df)
-        pred = np.exp(model.predict(input_transformed).flatten()[0])
-        st.info(f"💡 Estimated Medical Expense: **${pred:,.2f}**")
+        y_log = model.predict(input_transformed).flatten()[0]
+        pred = np.exp(y_log) - 1   # Reverse log(…+1)
+
+        st.success(f"💰 Estimated Medical Expense: **${pred:,.2f}**")
+
+    # --------------------
+    # Plot
+    # --------------------
+        fig, ax = plt.subplots(figsize=(6, 4))
+        ax.bar(["Predicted Expense"], [pred], color="skyblue")
+        ax.set_ylabel("Expense ($)")
+        ax.set_title("Predicted Medical Expense")
+        st.pyplot(fig)
