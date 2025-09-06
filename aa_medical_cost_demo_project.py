@@ -183,80 +183,33 @@ def create_model(input_shape):
 # --------------------
 # Train Model Button
 # --------------------
-if st.button("🚀 Train Model"):
-    model = create_model(X_train.shape[1])
-    early_stopping = tf.keras.callbacks.EarlyStopping(
-        monitor="val_loss", patience=10, restore_best_weights=True
-    )
-    lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(
-        monitor="val_loss", factor=0.5, patience=5
-    )
+st.subheader("🔮 Try Your Own Prediction")
+col1, col2, col3 = st.columns(3)
+with col1:
+    age = st.slider("Age", 18, 64, 30)
+    bmi = st.slider("BMI", 15.0, 40.0, 25.0)
+with col2:
+    children = st.number_input("Children", 0, 5, 1)
+    sex = st.selectbox("Sex", ["male", "female"])
+with col3:
+    smoker = st.selectbox("Smoker", ["yes", "no"])
+    region = st.selectbox("Region", df["region"].unique())
 
-    history = model.fit(
-        X_train,
-        y_train,
-        epochs=10,
-        batch_size=16,
-        validation_split=0.2,
-        callbacks=[early_stopping, lr_scheduler],
-        verbose=0,
-    )
+    if st.button("Predict"):
+        input_df = pd.DataFrame([[age, bmi, children, sex, smoker, region]],
+                        columns=["age", "bmi", "children", "sex", "smoker", "region"])
 
-    # Plot training history
-    st.subheader("📈 Training History")
-    fig, ax = plt.subplots()
-    ax.plot(history.history["mae"], label="Train MAE")
-    ax.plot(history.history["val_mae"], label="Val MAE")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("MAE")
-    ax.legend()
+    input_transformed = preprocessor.transform(input_df)
+    y_log = model.predict(input_transformed).flatten()[0]
+    pred = np.exp(y_log) - 1   # Reverse log(…+1)
+
+    st.success(f"💰 Estimated Medical Expense: **${pred:,.2f}**")
+
+# --------------------
+# Plot
+# --------------------
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.bar(["Predicted Expense"], [pred], color="skyblue")
+    ax.set_ylabel("Expense ($)")
+    ax.set_title("Predicted Medical Expense")
     st.pyplot(fig)
-
-    # Evaluate
-    y_pred = np.exp(model.predict(X_test).flatten())
-    y_test_original = np.exp(y_test)
-    mae = mean_absolute_error(y_test_original, y_pred)
-    st.success(f"✅ Mean Absolute Error: {mae:.2f} expenses")
-
-    # Plot True vs Predictions
-    st.subheader("🎯 Predictions vs True Values")
-    fig2, ax2 = plt.subplots()
-    ax2.scatter(y_test_original, y_pred, alpha=0.6)
-    ax2.plot([0, max(y_test_original)], [0, max(y_test_original)], "r--")
-    ax2.set_xlabel("True Values")
-    ax2.set_ylabel("Predicted Values")
-    st.pyplot(fig2)
-
-    # --------------------
-    # User Input for Prediction
-    # --------------------
-    st.subheader("🔮 Try Your Own Prediction")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        age = st.slider("Age", 18, 64, 30)
-        bmi = st.slider("BMI", 15.0, 40.0, 25.0)
-    with col2:
-        children = st.number_input("Children", 0, 5, 1)
-        sex = st.selectbox("Sex", ["male", "female"])
-    with col3:
-        smoker = st.selectbox("Smoker", ["yes", "no"])
-        region = st.selectbox("Region", df["region"].unique())
-
-        if st.button("Predict"):
-            input_df = pd.DataFrame([[age, bmi, children, sex, smoker, region]],
-                            columns=["age", "bmi", "children", "sex", "smoker", "region"])
-    
-        input_transformed = preprocessor.transform(input_df)
-        y_log = model.predict(input_transformed).flatten()[0]
-        pred = np.exp(y_log) - 1   # Reverse log(…+1)
-
-        st.success(f"💰 Estimated Medical Expense: **${pred:,.2f}**")
-
-    # --------------------
-    # Plot
-    # --------------------
-        fig, ax = plt.subplots(figsize=(6, 4))
-        ax.bar(["Predicted Expense"], [pred], color="skyblue")
-        ax.set_ylabel("Expense ($)")
-        ax.set_title("Predicted Medical Expense")
-        st.pyplot(fig)
